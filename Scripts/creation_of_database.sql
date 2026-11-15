@@ -1,0 +1,11 @@
+
+USE master
+-- CREATION OF DATABASE
+CREATE DATABASE Datawarehousezyyad
+USE Datawarehousezyyad
+-- CREATION OF SCHEMAS
+CREATE SCHEMA bronze
+CREATE SCHEMA Silver;
+GO
+CREATE SCHEMA Gold;
+GO

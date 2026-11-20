@@ -1,127 +1,193 @@
-/* ============================================================
-   Procedure : bronze.load_procedure
-   Purpose   : Load all raw CSV files from the CRM and ERP 
-               sources into the Bronze layer of the Data Warehouse.
-   
-   How it works: 
-     1. Truncates each target table to ensure a clean, full refresh.
-     2. Uses BULK INSERT to quickly ingest raw data from the 
-        CSV files.
-     3. Captures and prints the execution time (in ms and seconds) 
-        for each table load using PRINT statements, providing 
-        basic performance monitoring.
-   ============================================================ */
-CREATE OR ALTER PROCEDURE bronze.load_procedure
+CREATE OR ALTER PROCEDURE bronze.usp_Load_Bronze_Tables
 AS
 BEGIN
-    DECLARE @batch_start_time DATETIME
-    DECLARE @batch_end_time DATETIME
-    DECLARE @start_time   DATETIME2;
-    DECLARE @end_time     DATETIME2;
-    DECLARE @duration_ms  INT;
-    PRINT '=================================================';
-    PRINT 'Starting Bronze layer load...';
-    PRINT '=================================================';
+    SET NOCOUNT ON;
 
+    DECLARE @start_crm   DATETIME2 = SYSDATETIME();
+    DECLARE @start_erp   DATETIME2 = SYSDATETIME();
+    DECLARE @start_tbl   DATETIME2;
+    DECLARE @duration    INT;
 
-    /* ========================================================
-       LOADING CRM SOURCE TABLES
-       ======================================================== */
-    PRINT '-------------------------------------------------';
-    PRINT 'Loading CRM source tables...';
-    PRINT '-------------------------------------------------';
-    SET @batch_start_time=GETDATE();
-    -- Loading table: bronze.crm_sales_details
-    PRINT '>> Loading table: bronze.crm_sales_details ...';
-    SET @start_time = SYSDATETIME();
-    TRUNCATE TABLE bronze.crm_sales_details;
-    BULK INSERT bronze.crm_sales_details
-    FROM 'C:\Users\hp\Desktop\tous\SQL\sql-data-warehouse-project\datasets\source_crm\sales_details.csv'
-    WITH ( FIRSTROW = 2, FIELDTERMINATOR = ',', TABLOCK );
-    SET @end_time    = SYSDATETIME();
-    SET @duration_ms = DATEDIFF(MILLISECOND, @start_time, @end_time);
-    PRINT '>> Done: bronze.crm_sales_details |  Duration: '
-          + CAST(@duration_ms AS VARCHAR(20)) + ' ms ('
-          + CAST(@duration_ms / 1000.0 AS VARCHAR(20)) + ' s'
-    -- Loading table: bronze.crm_cust_info
-    PRINT '>> Loading table: bronze.crm_cust_info ...';
-    SET @start_time = SYSDATETIME();
+    /* ============================================================
+       LOADING CRM TABLES
+       ============================================================ */
+    PRINT '============================================';
+    PRINT 'START LOADING CRM TABLES';
+    PRINT '============================================';
+
+    /* ------------------------------------------------------------
+       Loading table bronze.crm_cust_info
+       Source: C:\path\to\cust_info.csv
+       ------------------------------------------------------------ */
+    PRINT 'Loading table bronze.crm_cust_info ...';
+    SET @start_tbl = SYSDATETIME();
+
     TRUNCATE TABLE bronze.crm_cust_info;
+
     BULK INSERT bronze.crm_cust_info
-    FROM 'C:\Users\hp\Desktop\tous\SQL\sql-data-warehouse-project\datasets\source_crm\cust_info.csv'
-    WITH ( FIRSTROW = 2, FIELDTERMINATOR = ',', TABLOCK );
-    SET @end_time    = SYSDATETIME();
-    SET @duration_ms = DATEDIFF(MILLISECOND, @start_time, @end_time);
-    PRINT '>> Done: bronze.crm_cust_info|  Duration: '
-          + CAST(@duration_ms AS VARCHAR(20)) + ' ms ('
-          + CAST(@duration_ms / 1000.0 AS VARCHAR(20)) + ' s';
+    FROM 'C:\path\to\cust_info.csv'
+    WITH (
+        FIRSTROW        = 2,
+        FIELDTERMINATOR = ',',
+        ROWTERMINATOR   = '\n',
+        CODEPAGE        = '65001'
+    );
 
-    -- Loading table: bronze.crm_prd_info
-    PRINT '>> Loading table: bronze.crm_prd_info ...';
-    SET @start_time = SYSDATETIME();
+    SET @duration = DATEDIFF(SECOND, @start_tbl, SYSDATETIME());
+    PRINT 'Loaded bronze.crm_cust_info in ' + CAST(@duration AS VARCHAR(10)) + ' s';
+
+    /* ------------------------------------------------------------
+       Loading table bronze.crm_prd_info
+       Source: C:\path\to\prd_info.csv
+       ------------------------------------------------------------ */
+    PRINT 'Loading table bronze.crm_prd_info ...';
+    SET @start_tbl = SYSDATETIME();
+
     TRUNCATE TABLE bronze.crm_prd_info;
+
     BULK INSERT bronze.crm_prd_info
-    FROM 'C:\Users\hp\Desktop\tous\SQL\sql-data-warehouse-project\datasets\source_crm\prd_info.csv'
-    WITH ( FIRSTROW = 2, FIELDTERMINATOR = ',', TABLOCK );
-    SET @end_time    = SYSDATETIME();
-    SET @duration_ms = DATEDIFF(MILLISECOND, @start_time, @end_time);
-    PRINT '>> Done: bronze.crm_prd_info  |  Duration: '
-          + CAST(@duration_ms AS VARCHAR(20)) + ' ms ('
-          + CAST(@duration_ms / 1000.0 AS VARCHAR(20)) + ' s)';
+    FROM 'C:\path\to\prd_info.csv'
+    WITH (
+        FIRSTROW        = 2,
+        FIELDTERMINATOR = ',',
+        ROWTERMINATOR   = '\n',
+        CODEPAGE        = '65001'
+    );
+
+    SET @duration = DATEDIFF(SECOND, @start_tbl, SYSDATETIME());
+    PRINT 'Loaded bronze.crm_prd_info in ' + CAST(@duration AS VARCHAR(10)) + ' s';
+
+    /* ------------------------------------------------------------
+       Loading table bronze.crm_sales_details
+       Source: C:\path\to\sales_details.csv
+       ------------------------------------------------------------ */
+    PRINT 'Loading table bronze.crm_sales_details ...';
+    SET @start_tbl = SYSDATETIME();
+
+    TRUNCATE TABLE bronze.crm_sales_details;
+
+    BULK INSERT bronze.crm_sales_details
+    FROM 'C:\path\to\sales_details.csv'
+    WITH (
+        FIRSTROW        = 2,
+        FIELDTERMINATOR = ',',
+        ROWTERMINATOR   = '\n',
+        CODEPAGE        = '65001'
+    );
+
+    SET @duration = DATEDIFF(SECOND, @start_tbl, SYSDATETIME());
+    PRINT 'Loaded bronze.crm_sales_details in ' + CAST(@duration AS VARCHAR(10)) + ' s';
+
+    /* ------------------------------------------------------------
+       Global duration for CRM loading
+       ------------------------------------------------------------ */
+    SET @duration = DATEDIFF(SECOND, @start_crm, SYSDATETIME());
+    PRINT '--------------------------------------------';
+    PRINT 'CRM LOADING COMPLETED IN ' + CAST(@duration AS VARCHAR(10)) + ' s';
+    PRINT '--------------------------------------------';
 
 
-    /* ========================================================
-       LOADING ERP SOURCE TABLES
-       ======================================================== */
-    PRINT '-------------------------------------------------';
-    PRINT 'Loading ERP source tables...';
-    PRINT '-------------------------------------------------';
+    /* ============================================================
+       LOADING ERP TABLES
+       ============================================================ */
+    PRINT '============================================';
+    PRINT 'START LOADING ERP TABLES';
+    PRINT '============================================';
+    SET @start_erp = SYSDATETIME();
 
-    -- Loading table: bronze.erp_cust_az12
-    PRINT '>> Loading table: bronze.erp_cust_az12 ...';
-    SET @start_time = SYSDATETIME();
+    /* ------------------------------------------------------------
+       Loading table bronze.erp_cust_az12
+       Source: C:\path\to\CUST_AZ12.csv
+       ------------------------------------------------------------ */
+    PRINT 'Loading table bronze.erp_cust_az12 ...';
+    SET @start_tbl = SYSDATETIME();
+
     TRUNCATE TABLE bronze.erp_cust_az12;
+
     BULK INSERT bronze.erp_cust_az12
-    FROM 'C:\Users\hp\Desktop\tous\SQL\sql-data-warehouse-project\datasets\source_erp\CUST_AZ12.csv'
-    WITH ( FIRSTROW = 2, FIELDTERMINATOR = ',', TABLOCK );
-    SET @end_time    = SYSDATETIME();
-    SET @duration_ms = DATEDIFF(MILLISECOND, @start_time, @end_time);
-    PRINT '>> Done: bronze.erp_cust_az12 |  Duration: '
-          + CAST(@duration_ms AS VARCHAR(20)) + ' ms ('
-          + CAST(@duration_ms / 1000.0 AS VARCHAR(20)) + ' s)';
+    FROM 'C:\path\to\CUST_AZ12.csv'
+    WITH (
+        FIRSTROW        = 2,
+        FIELDTERMINATOR = ',',
+        ROWTERMINATOR   = '\n',
+        CODEPAGE        = '65001'
+    );
 
-    -- Loading table: bronze.erp_loc_a101
-    PRINT '>> Loading table: bronze.erp_loc_a101 ...';
-    SET @start_time = SYSDATETIME();
+    SET @duration = DATEDIFF(SECOND, @start_tbl, SYSDATETIME());
+    PRINT 'Loaded bronze.erp_cust_az12 in ' + CAST(@duration AS VARCHAR(10)) + ' s';
+
+    /* ------------------------------------------------------------
+       Loading table bronze.erp_loc_a101
+       Source: C:\path\to\LOC_A101.csv
+       ------------------------------------------------------------ */
+    PRINT 'Loading table bronze.erp_loc_a101 ...';
+    SET @start_tbl = SYSDATETIME();
+
     TRUNCATE TABLE bronze.erp_loc_a101;
+
     BULK INSERT bronze.erp_loc_a101
-    FROM 'C:\Users\hp\Desktop\tous\SQL\sql-data-warehouse-project\datasets\source_erp\LOC_A101.csv'
-    WITH ( FIRSTROW = 2, FIELDTERMINATOR = ',', TABLOCK );
-    SET @end_time    = SYSDATETIME();
-    SET @duration_ms = DATEDIFF(MILLISECOND, @start_time, @end_time);
-    PRINT '>> Done: bronze.erp_loc_a101 |  Duration: '
-          + CAST(@duration_ms AS VARCHAR(20)) + ' ms ('
-          + CAST(@duration_ms / 1000.0 AS VARCHAR(20)) + ' s)';
+    FROM 'C:\path\to\LOC_A101.csv'
+    WITH (
+        FIRSTROW        = 2,
+        FIELDTERMINATOR = ',',
+        ROWTERMINATOR   = '\n',
+        CODEPAGE        = '65001'
+    );
 
-    -- Loading table: bronze.erp_px_cat_g1v2
-    PRINT '>> Loading table: bronze.erp_px_cat_g1v2 ...';
-    SET @start_time = SYSDATETIME();
+    SET @duration = DATEDIFF(SECOND, @start_tbl, SYSDATETIME());
+    PRINT 'Loaded bronze.erp_loc_a101 in ' + CAST(@duration AS VARCHAR(10)) + ' s';
+
+    /* ------------------------------------------------------------
+       Loading table bronze.erp_px_cat_g1v2
+       Source: C:\path\to\PX_CAT_G1V2.csv
+       ------------------------------------------------------------ */
+    PRINT 'Loading table bronze.erp_px_cat_g1v2 ...';
+    SET @start_tbl = SYSDATETIME();
+
     TRUNCATE TABLE bronze.erp_px_cat_g1v2;
+
     BULK INSERT bronze.erp_px_cat_g1v2
-    FROM 'C:\Users\hp\Desktop\tous\SQL\sql-data-warehouse-project\datasets\source_erp\PX_CAT_G1V2.csv'
-    WITH ( FIRSTROW = 2, FIELDTERMINATOR = ',', TABLOCK );
-    SET @end_time    = SYSDATETIME();
-    SET @duration_ms = DATEDIFF(MILLISECOND, @start_time, @end_time);
-    PRINT '>> Done: bronze.erp_px_cat_g1v2 |  Duration: '
-          + CAST(@duration_ms AS VARCHAR(20)) + ' ms ('
-          + CAST(@duration_ms / 1000.0 AS VARCHAR(20)) + ' s)';
+    FROM 'C:\path\to\PX_CAT_G1V2.csv'
+    WITH (
+        FIRSTROW        = 2,
+        FIELDTERMINATOR = ',',
+        ROWTERMINATOR   = '\n',
+        CODEPAGE        = '65001'
+    );
 
-    SET @batch_end_time=GETDATE()
-    PRINT '=================================================';
-    PRINT 'Bronze layer load completed successfully'+ CAST(DATEDIFF(second,@batch_end_time,@batch_start_time) AS NVARCHAR) ;
-    PRINT 'Total Load Time'+ CAST(DATEDIFF(second,@batch_end_time,@batch_start_time) AS NVARCHAR) +'seconds' ;
-    PRINT '=================================================';
-    
+    SET @duration = DATEDIFF(SECOND, @start_tbl, SYSDATETIME());
+    PRINT 'Loaded bronze.erp_px_cat_g1v2 in ' + CAST(@duration AS VARCHAR(10)) + ' s';
 
-END
+    /* ------------------------------------------------------------
+       Global duration for ERP loading
+       ------------------------------------------------------------ */
+    SET @duration = DATEDIFF(SECOND, @start_erp, SYSDATETIME());
+    PRINT '--------------------------------------------';
+    PRINT 'ERP LOADING COMPLETED IN ' + CAST(@duration AS VARCHAR(10)) + ' s';
+    PRINT '--------------------------------------------';
+
+
+    /* ============================================================
+       SPECIAL LOADING (summary / audit)
+       ============================================================ */
+    PRINT '============================================';
+    PRINT 'SPECIAL LOADING (SUMMARY)';
+    PRINT '============================================';
+
+    SELECT 'bronze.crm_cust_info'     AS table_name, COUNT(*) AS row_count FROM bronze.crm_cust_info
+    UNION ALL
+    SELECT 'bronze.crm_prd_info',              COUNT(*) FROM bronze.crm_prd_info
+    UNION ALL
+    SELECT 'bronze.crm_sales_details',         COUNT(*) FROM bronze.crm_sales_details
+    UNION ALL
+    SELECT 'bronze.erp_cust_az12',             COUNT(*) FROM bronze.erp_cust_az12
+    UNION ALL
+    SELECT 'bronze.erp_loc_a101',              COUNT(*) FROM bronze.erp_loc_a101
+    UNION ALL
+    SELECT 'bronze.erp_px_cat_g1v2',           COUNT(*) FROM bronze.erp_px_cat_g1v2;
+
+    PRINT '============================================';
+    PRINT 'ALL LOADING COMPLETED';
+    PRINT '============================================';
+END;
 GO

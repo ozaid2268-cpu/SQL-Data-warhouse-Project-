@@ -1,89 +1,83 @@
--- ============================================================
--- SCRIPT DE CRÉATION DES TABLES - COUCHE BRONZE
--- ============================================================
+IF OBJECT_ID('bronze.crm_cust_info', 'U') IS NOT NULL
+    DROP TABLE bronze.crm_cust_info;
 
--- 1. CRM : Sales Details
-IF OBJECT_ID('bronze.crm_sales_details', 'U') IS NOT NULL 
-    TRUNCATE TABLE bronze.crm_sales_details;
-GO
-CREATE TABLE bronze.crm_sales_details (
-    sls_ord_num    VARCHAR(20)    NOT NULL,
-    sls_prd_key    VARCHAR(20)    NOT NULL,
-    sls_cust_id    INT            NOT NULL,
-    sls_order_dt   INT            NOT NULL,  -- Format YYYYMMDD
-    sls_ship_dt    INT            NOT NULL,  -- Format YYYYMMDD
-    sls_due_dt     INT            NOT NULL,  -- Format YYYYMMDD
-    sls_sales      INT            NOT NULL,
-    sls_quantity   INT            NOT NULL,
-    sls_price      INT            NOT NULL,
-    PRIMARY KEY (sls_ord_num)
+CREATE TABLE bronze.crm_cust_info
+(
+    cst_id              INT             NULL,
+    cst_key             VARCHAR(20)     NULL,
+    cst_firstname       NVARCHAR(20)   NULL,
+    cst_lastname        NVARCHAR(20)   NULL,
+    cst_marital_status  CHAR(10)         NULL,
+    cst_gndr            CHAR(10)         NULL,
+    cst_create_date     DATE            NULL
 );
-GO
 
--- 2. CRM : Customer Info
-IF OBJECT_ID('bronze.crm_cust_info', 'U') IS NOT NULL 
-    TRUNCATE TABLE bronze.crm_cust_info;
-GO
-CREATE TABLE bronze.crm_cust_info (
-    cst_id              INT            NOT NULL,
-    cst_key             VARCHAR(20)    NOT NULL,
-    cst_firstname       VARCHAR(50)    NULL,
-    cst_lastname        VARCHAR(50)    NULL,
-    cst_marital_status  VARCHAR(1)     NULL,
-    cst_gndr            VARCHAR(1)     NULL,
-    cst_create_date     DATE           NULL,
-    PRIMARY KEY (cst_id)
-);
-GO
+/* Creating table: bronze1.crm_prd_info */
+IF OBJECT_ID('bronze.crm_prd_info', 'U') IS NOT NULL
+    DROP TABLE bronze.crm_prd_info;
 
--- 3. CRM : Product Info
-IF OBJECT_ID('bronze.crm_prd_info', 'U') IS NOT NULL 
-    TRUNCATE TABLE bronze.crm_prd_info;
-GO
-CREATE TABLE bronze.crm_prd_info (
-    prd_id         INT            NOT NULL,
-    prd_key        VARCHAR(30)    NOT NULL,
-    prd_nm         VARCHAR(60)    NULL,
-    prd_cost       INT            NULL,
-    prd_line       VARCHAR(10)    NULL,
-    prd_start_dt   DATE           NULL,
-    prd_end_dt     DATE           NULL,
-    PRIMARY KEY (prd_id)
+CREATE TABLE bronze.crm_prd_info
+(
+    prd_id          INT             NULL,
+    prd_key         VARCHAR(30)     NULL,
+    prd_nm          NVARCHAR(50)   NULL,
+    prd_cost        INT             NULL,
+    prd_line        CHAR(15)         NULL,
+    prd_start_dt    DATE            NULL,
+    prd_end_dt      DATE            NULL
 );
-GO
 
--- 4. ERP : Customer Birthdate & Gender
-IF OBJECT_ID('bronze.erp_cust_az12', 'U') IS NOT NULL 
-    TRUNCATE TABLE bronze.erp_cust_az12;
-GO
-CREATE TABLE bronze.erp_cust_az12 (
-    cid     VARCHAR(20)   NOT NULL,
-    bdate   DATE          NOT NULL,
-    gen     VARCHAR(10)   NULL,
-    PRIMARY KEY (cid)
-);
-GO
+/* Creating table: bronze1.crm_sales_details */
+IF OBJECT_ID('bronze.crm_sales_details', 'U') IS NOT NULL
+    DROP TABLE bronze.crm_sales_details;
 
--- 5. ERP : Customer Location
-IF OBJECT_ID('bronze.erp_loc_a101', 'U') IS NOT NULL 
-    TRUNCATE TABLE bronze.erp_loc_a101;
-GO
-CREATE TABLE bronze.erp_loc_a101 (
-    cid     VARCHAR(20)   NOT NULL,
-    cntry   VARCHAR(30)   NULL,
-    PRIMARY KEY (cid)
+CREATE TABLE bronze.crm_sales_details
+(
+    sls_ord_num     VARCHAR(15)     NULL,
+    sls_prd_key     VARCHAR(30)     NULL,
+    sls_cust_id     INT             NULL,
+    sls_order_dt    INT             NULL,
+    sls_ship_dt     INT             NULL,
+    sls_due_dt      INT             NULL,
+    sls_sales       INT             NULL,
+    sls_quantity    INT             NULL,
+    sls_price       INT             NULL
 );
-GO
 
--- 6. ERP : Product Category
-IF OBJECT_ID('bronze.erp_px_cat_g1v2', 'U') IS NOT NULL 
-    TRUNCATE TABLE bronze.erp_px_cat_g1v2;
-GO
-CREATE TABLE bronze.erp_px_cat_g1v2 (
-    id            VARCHAR(10)   NOT NULL,
-    cat           VARCHAR(20)   NOT NULL,
-    subcat        VARCHAR(30)   NOT NULL,
-    maintenance   VARCHAR(3)    NOT NULL,
-    PRIMARY KEY (id)
+/* ============================================================
+   ERP TABLES
+   ============================================================ */
+
+/* Creating table: bronze1.erp_cust_az12
+   (source: CUST_AZ12.csv — CID, BDATE, GEN) */
+IF OBJECT_ID('bronze.erp_cust_az12', 'U') IS NOT NULL
+    DROP TABLE bronze.erp_cust_az12;
+
+CREATE TABLE bronze.erp_cust_az12
+(
+    CID     VARCHAR(20)     NULL,
+    BDATE   DATE            NULL,
+    GEN     VARCHAR(10)     NULL
 );
-GO
+
+/* Creating table: bronze1.erp_loc_a101
+   (placeholder — send the CSV header and I will fill in the columns) */
+IF OBJECT_ID('bronze.erp_loc_a101', 'U') IS NOT NULL
+    DROP TABLE bronze.erp_loc_a101;
+ CREATE TABLE bronze.erp_loc_a101
+ (
+    CID     VARCHAR(50)     NULL,
+    CNTRY   VARCHAR(50)     NULL
+ );
+
+/* Creating table: bronze1.erp_px_cat_g1v2
+   (placeholder — send the CSV header and I will fill in the columns) */
+IF OBJECT_ID('bronze.erp_px_cat_g1v2', 'U') IS NOT NULL
+     DROP TABLE bronze.erp_px_cat_g1v2;
+CREATE TABLE bronze.erp_px_cat_g1v2
+ (
+     ID           VARCHAR(10)   NULL,
+     CAT          VARCHAR(50)   NULL,
+     SUBCAT       VARCHAR(50)   NULL,
+     MAINTENANCE  CHAR(4)       NULL
+ );

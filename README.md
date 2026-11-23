@@ -42,17 +42,22 @@ The initial extraction joins CRM and ERP tables using specific logic (e.g., stri
 
 🧮 Data Modeling (Gold Layer)
 The Gold layer is designed using a Star Schema, allowing for fast aggregation and intuitive querying.
-
+--
 📌 Fact Table: gold.fact_sales
 The central transactional table storing key sales metrics.
-
+--
 Grain: One row per sales order line.
-
+--
 Measures: quantity, price, sales_amount.
-
+--
 Foreign Keys: Links to Dim_Customers and Dim_Products.
-
+--
 📌 Dimension Tables
 gold.dim_customers: Consolidated CRM and ERP customer data. Includes standardized gender, marital status, country, and birthdate.
-
+--
 gold.dim_products: Consolidated product and category data. Includes extracted category IDs, product names, lines, and historical start/end dates.
+--
+More information:
+LINKEDIN:https://www.linkedin.com/in/zaid-oualaarbi-9b8b693b4/
+GITHUB:ozaid2268-cpu
+GMAIL:ozaid2268@gmail.com

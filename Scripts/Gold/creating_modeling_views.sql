@@ -1,4 +1,18 @@
-
+/* ============================================================
+   Gold Layer — Star Schema Views (Dimensions & Fact)
+   ------------------------------------------------------------
+   1. Builds the curated analytics layer as views on top of
+      silver: two dimensions (dim_customers, dim_products) and
+      one fact (fact_sales) — forming a classic star schema.
+   2. dim_customers: enriched customer profile by joining CRM
+      customer info with ERP demographics (birthdate, country).
+   3. dim_products: product dimension joined with ERP category
+      hierarchy (category, subcategory, maintenance).
+   4. fact_sales: sales transactions linked to dim_products and
+      dim_customers via surrogate keys for BI/reporting.
+   5. Uses CREATE OR ALTER VIEW — safe to re-run anytime to
+      refresh the gold layer without dropping objects.
+   ============================================================ */
 --Creating Tableview Dim_customers:
 IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'gold')
     EXEC('CREATE SCHEMA gold');

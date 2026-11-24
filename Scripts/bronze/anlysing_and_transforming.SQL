@@ -1,4 +1,19 @@
-
+/* ============================================================
+   Bronze Layer - Data Exploration & Cleaning (Transformations)
+   ------------------------------------------------------------
+   1. Profiles each bronze source table (CRM & ERP) to understand
+      structure, then tests for NULLs, duplicates, whitespace,
+      invalid dates, and inconsistent coded values before cleaning.
+   2. Applies cleaning per table via CTEs: trims strings, maps
+      coded values (marital status, gender, product line, country),
+      deduplicates customers, fixes date formats & invalid numbers.
+   3. Business rules enforced: recalculates inconsistent sales/price
+      values, strips 'NAS' prefix from CRM IDs, removes '-' from ERP IDs.
+   4. Output of each CTE is a cleaned dataset ready to be written
+      into the silver layer — this file is for exploration/prototyping.
+   5. Note: some queries are ad-hoc checks; only the final CTE
+      SELECTs represent the cleaned output.
+   ============================================================ */
 -- FETCHING ALL TABLES FOR REALTIONS (Architecture):
 SELECT TOP 10 * FROM bronze.crm_cust_info
 SELECT TOP 10 * FROM bronze.crm_prd_info

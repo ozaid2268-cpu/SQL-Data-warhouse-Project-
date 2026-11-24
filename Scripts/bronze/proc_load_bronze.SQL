@@ -1,3 +1,16 @@
+/* ============================================================
+   Stored Procedure: bronze.usp_Load_Bronze_Tables
+   ------------------------------------------------------------
+   1. Master loader for the bronze layer: truncates and reloads
+      all 6 raw source tables (3 CRM + 3 ERP) from CSV files via
+      BULK INSERT with UTF-8 codepage and header row skipping.
+   2. Idempotent by design — TRUNCATE before each load guarantees
+      a clean, repeatable full refresh on every execution.
+   3. Tracks performance: logs per-table load time plus total
+      CRM and ERP durations using SYSDATETIME/DATEDIFF.
+   4. Ends with an audit summary (UNION ALL) showing row counts
+      per table, so you can verify all sources loaded successfully.
+   ============================================================ */
 CREATE OR ALTER PROCEDURE bronze.usp_Load_Bronze_Tables
 AS
 BEGIN

@@ -1,3 +1,19 @@
+/* ============================================================
+   Stored Procedure: silver.usp_Create_Silver_Tables
+   ------------------------------------------------------------
+   1. Creates the silver-layer schema tables for all 6 cleaned
+      CRM & ERP datasets (mirrors bronze structure with refined
+      data types: wider VARCHARs, proper DATE columns, no NULLs
+      on key fields, added cat_id in prd_info).
+   2. Idempotent by design — each table is DROP + CREATE, so the
+      script can be re-run safely to rebuild the silver schema.
+   3. Silver tables hold cleaned, standardized, typed data ready
+      for joining and loading into the gold layer.
+   4. Executed automatically at the end via
+      EXEC silver.usp_Create_Silver_Tables.
+   5. ⚠️ WARNING: DROP TABLE will delete all existing silver data
+      — run this only during setup or a full rebuild.
+   ============================================================ */
 --creating Tables for schema silver :
 CREATE OR ALTER PROCEDURE silver.usp_Create_Silver_Tables
 AS

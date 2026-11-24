@@ -1,3 +1,17 @@
+/* ============================================================
+   Bronze Layer - Table Creation Script (DDL)
+   ------------------------------------------------------------
+   1. Creates raw ingestion tables in the 'bronze' schema for CRM
+      (cust_info, prd_info, sales_details) and ERP (cust_az12,
+      loc_a101, px_cat_g1v2) source systems.
+   2. Each block drops the existing table if present (idempotent)
+      and recreates it with all columns as NULL to preserve
+      source data integrity before any transformation.
+   3. All fields are loaded as-is (no cleaning) — typing and
+      casting are handled downstream in the silver layer.
+   4. Run this script once per environment setup or whenever the
+      bronze schema needs to be reset/rebuilt from scratch.
+   ============================================================ */
 IF OBJECT_ID('bronze.crm_cust_info', 'U') IS NOT NULL
     DROP TABLE bronze.crm_cust_info;
 

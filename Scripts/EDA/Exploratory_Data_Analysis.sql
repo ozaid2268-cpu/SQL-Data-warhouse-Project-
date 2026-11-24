@@ -1,3 +1,32 @@
+/* ============================================================
+   Exploratory Data Analysis (EDA) — Gold Layer
+   ------------------------------------------------------------
+   1. Purpose: profile the gold star schema (dim_customers,
+      dim_products, fact_sales) to validate data quality and
+      understand the business before building reports/dashboards.
+   2. Entity profiling: lists distinct values for product
+      categories, customer demographics (gender, marital status,
+      country) and sales quantities to spot unexpected values.
+   3. Date exploration: min/max order dates, shipping lead times,
+      customer age range (birthdates), and product lifespan
+      (active vs discontinued using end_dt).
+   4. Measure exploration: min/max/avg of sales, price, quantity;
+      checks for negative sales and non-positive quantities;
+      top revenue orders; total revenue, units sold, and AOV.
+   5. Cardinality checks: unique orders, customers, and products;
+      low-cardinality distributions (customers by gender,
+      products by category) to guide dimension design.
+   6. Business KPIs: time series by year/month (revenue + units),
+      sales by product category, and top 10 customers by spend.
+   7. All queries are read-only (SELECT) — safe to run repeatedly
+      against the gold layer without modifying any data.
+   8. Assumes gold views (dim_customers, dim_products,
+      fact_sales) are already created and silver is loaded.
+   9. Note: a filter `order_date <= '2025-12-31'` guards against
+      a known bad date (5489) from source dirty data.
+  10. These queries are for analysis/validation only — not part
+      of the ETL pipeline; safe to remove from production runs.
+   ============================================================ */
 --Exploratory Data Analysis :
 --several antyties
 -- Distinct values for Products

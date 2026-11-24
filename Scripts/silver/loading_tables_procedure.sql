@@ -1,3 +1,18 @@
+/* ============================================================
+   Stored Procedure: silver.usp_importing_slvr
+   ------------------------------------------------------------
+   1. Main transformation & load proc: reads from bronze, applies
+      all cleaning rules, and loads the cleaned data into silver.
+   2. Per table: TRUNCATE silver → run cleaning CTE → INSERT SELECT,
+      so every run does a full refresh (idempotent, re-runnable).
+   3. Cleaning rules: trim strings, standardize coded values
+      (marital status, gender, product line, country, IDs),
+      dedupe customers (ROW_NUMBER by latest create_date), fix
+      dates, recalc inconsistent sales/price, derive prd_end_dt.
+   4. Runs all 6 CRM/ERP tables in sequence — bronze must already
+      be loaded (run bronze.usp_Load_Bronze_Tables first).
+   5. Ends with EXEC + sample SELECTs to verify each silver table.
+   ============================================================ */
 --Create procedure for loading table after transformations 
 CREATE OR ALTER PROCEDURE silver.usp_importing_slvr
 AS
